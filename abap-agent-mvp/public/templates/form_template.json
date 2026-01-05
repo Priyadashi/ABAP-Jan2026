@@ -1,0 +1,181 @@
+{
+  "ricef_type": "Form",
+  "project_name": "",
+  "description": "",
+  "sap_version": "S/4HANA",
+  "form_details": {
+    "form_name": "Z_",
+    "form_title": "",
+    "form_type": "SMARTFORM",
+    "output_format": "PDF",
+    "form_category": "INVOICE",
+    "print_program": {
+      "program_name": "Z_",
+      "function_module_name": "",
+      "include_programs": []
+    },
+    "form_layout": {
+      "page_format": "A4",
+      "orientation": "PORTRAIT",
+      "margins": {
+        "top": "1cm",
+        "bottom": "1cm",
+        "left": "1cm",
+        "right": "1cm"
+      },
+      "header": {
+        "height": "3cm",
+        "content_description": "",
+        "logo_required": false,
+        "logo_path": ""
+      },
+      "footer": {
+        "height": "2cm",
+        "content_description": "",
+        "page_numbering": true
+      },
+      "main_window": {
+        "width": "100%",
+        "content_description": ""
+      }
+    },
+    "data_sources": {
+      "primary_table": "",
+      "header_structure": "",
+      "item_structure": "",
+      "additional_tables": [],
+      "custom_structures": [
+        {
+          "structure_name": "",
+          "fields": []
+        }
+      ]
+    },
+    "form_elements": {
+      "text_elements": [
+        {
+          "element_name": "",
+          "element_type": "STATIC_TEXT",
+          "content": "",
+          "position": {
+            "x": "",
+            "y": ""
+          },
+          "formatting": {
+            "font": "Arial",
+            "size": 10,
+            "bold": false,
+            "italic": false
+          }
+        }
+      ],
+      "data_fields": [
+        {
+          "field_name": "",
+          "field_source": "",
+          "field_type": "",
+          "position": {
+            "x": "",
+            "y": ""
+          },
+          "formatting": {
+            "font": "Arial",
+            "size": 10,
+            "alignment": "LEFT"
+          }
+        }
+      ],
+      "tables": [
+        {
+          "table_name": "",
+          "data_source": "",
+          "columns": [
+            {
+              "column_name": "",
+              "header_text": "",
+              "width": "",
+              "alignment": "LEFT"
+            }
+          ],
+          "sorting": [],
+          "totals": []
+        }
+      ],
+      "graphics": [
+        {
+          "graphic_name": "",
+          "graphic_type": "LOGO",
+          "source": "",
+          "position": {
+            "x": "",
+            "y": ""
+          },
+          "dimensions": {
+            "width": "",
+            "height": ""
+          }
+        }
+      ]
+    },
+    "conditional_logic": {
+      "conditions": [
+        {
+          "condition_name": "",
+          "condition_logic": "",
+          "action": "",
+          "description": ""
+        }
+      ],
+      "alternative_layouts": []
+    },
+    "output_configuration": {
+      "print_immediately": false,
+      "printer_name": "",
+      "number_of_copies": 1,
+      "output_device": "LOCL",
+      "spool_options": {
+        "delete_after_print": false,
+        "authorization": ""
+      }
+    },
+    "language_support": {
+      "multi_language": false,
+      "supported_languages": ["EN"],
+      "translation_required": false
+    }
+  },
+  "interface_parameters": {
+    "input_parameters": [
+      {
+        "parameter_name": "",
+        "data_type": "",
+        "description": "",
+        "mandatory": true
+      }
+    ],
+    "output_parameters": [],
+    "exceptions": []
+  },
+  "data_retrieval_logic": {
+    "selection_logic": "",
+    "data_processing": "",
+    "calculations": []
+  },
+  "special_requirements": "",
+  "performance_notes": "",
+  "testing_requirements": {
+    "test_scenarios": [
+      {
+        "scenario_name": "",
+        "test_data": "",
+        "expected_output": ""
+      }
+    ],
+    "print_preview_required": true,
+    "output_validation": ""
+  },
+  "authorization": {
+    "auth_object": "",
+    "auth_fields": []
+  }
+}
