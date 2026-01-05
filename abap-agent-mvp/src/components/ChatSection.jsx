@@ -4,7 +4,25 @@ import Card from './Card';
 import Button from './Button';
 import { useToast } from './Toast';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Automatically detect API URL for GitHub Codespaces
+const getApiUrl = () => {
+  // Check if explicitly set in env
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+
+  // Check if running in GitHub Codespaces
+  const hostname = window.location.hostname;
+  if (hostname.includes('app.github.dev')) {
+    // Replace port 5173 with 8000 for backend
+    return window.location.origin.replace('-5173.', '-8000.');
+  }
+
+  // Default to localhost
+  return 'http://localhost:8000';
+};
+
+const API_URL = getApiUrl();
 
 const ChatSection = () => {
   const { addToast } = useToast();
