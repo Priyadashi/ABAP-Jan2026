@@ -8,6 +8,12 @@ A professional full-stack web application that helps SAP developers generate pro
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python)
 ![OpenAI](https://img.shields.io/badge/OpenAI-Assistants%20API-412991?logo=openai)
 
+## 👋 New to Programming? Using GitHub Codespaces?
+
+**📘 [Click here for the beginner-friendly setup guide](./CODESPACES.md)**
+
+This guide walks you through running the application in GitHub Codespaces with simple copy-paste commands - no programming experience required!
+
 ## ✨ What's New - OpenAI Assistants API Integration
 
 **🎉 Major Update:** Complete rewrite using OpenAI Assistants API with FastAPI backend!
