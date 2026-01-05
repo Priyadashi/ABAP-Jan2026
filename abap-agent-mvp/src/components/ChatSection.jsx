@@ -109,7 +109,7 @@ const ChatSection = () => {
 {`import { ChatKit } from '@openai/chatkit';
 
 <ChatKit
-  agentId="YOUR_AGENT_ID"
+  agentId="wf_695b682cc6508190b4efd42040b8ee870d512e00ff2aae30"
   enableFileUpload={true}
   acceptedFileTypes={['.json']}
   placeholder="Upload your filled template..."
