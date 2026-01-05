@@ -1,0 +1,84 @@
+{
+  "ricef_type": "Interface",
+  "project_name": "",
+  "description": "",
+  "sap_version": "S/4HANA",
+  "interface_details": {
+    "interface_name": "Z_",
+    "interface_title": "",
+    "interface_type": "IDOC",
+    "direction": "INBOUND",
+    "communication_protocol": {
+      "protocol_type": "RFC",
+      "endpoint_url": "",
+      "authentication_method": ""
+    },
+    "source_system": {
+      "system_name": "",
+      "system_type": "",
+      "connection_details": ""
+    },
+    "target_system": {
+      "system_name": "",
+      "system_type": "",
+      "connection_details": ""
+    },
+    "data_mapping": {
+      "source_structure": "",
+      "target_structure": "",
+      "field_mappings": [
+        {
+          "source_field": "",
+          "target_field": "",
+          "transformation_logic": "",
+          "data_type": "",
+          "mandatory": true
+        }
+      ],
+      "mapping_rules": []
+    },
+    "message_format": {
+      "format_type": "XML",
+      "schema_definition": "",
+      "sample_payload": ""
+    },
+    "error_handling": {
+      "error_table": "",
+      "error_notification": {
+        "email_recipients": [],
+        "notification_method": ""
+      },
+      "retry_mechanism": {
+        "max_retries": 3,
+        "retry_interval": "300",
+        "retry_logic": ""
+      }
+    },
+    "validation_rules": {
+      "mandatory_field_checks": [],
+      "data_type_validations": [],
+      "business_validations": []
+    }
+  },
+  "processing_logic": {
+    "pre_processing": "",
+    "main_processing": "",
+    "post_processing": ""
+  },
+  "scheduling": {
+    "execution_frequency": "",
+    "job_name": "",
+    "variant_name": ""
+  },
+  "authorization": {
+    "auth_object": "",
+    "auth_fields": []
+  },
+  "special_requirements": "",
+  "performance_notes": "",
+  "monitoring_logging": {
+    "logging_level": "ERROR",
+    "log_retention_days": 30,
+    "monitoring_dashboard": ""
+  }
+}

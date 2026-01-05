@@ -1,0 +1,123 @@
+{
+  "ricef_type": "Conversion",
+  "project_name": "",
+  "description": "",
+  "sap_version": "S/4HANA",
+  "conversion_details": {
+    "conversion_name": "Z_",
+    "conversion_title": "",
+    "conversion_method": "LSMW",
+    "conversion_type": "ONE_TIME",
+    "source_data": {
+      "source_system": "",
+      "source_format": "EXCEL",
+      "source_location": "",
+      "file_structure": {
+        "delimiter": ",",
+        "header_row": true,
+        "encoding": "UTF-8"
+      },
+      "source_fields": [
+        {
+          "field_name": "",
+          "data_type": "",
+          "length": "",
+          "description": "",
+          "sample_value": ""
+        }
+      ]
+    },
+    "target_data": {
+      "target_object": "",
+      "target_table": "",
+      "target_transaction": "",
+      "target_fields": [
+        {
+          "field_name": "",
+          "data_type": "",
+          "mandatory": true,
+          "default_value": "",
+          "derivation_logic": ""
+        }
+      ]
+    },
+    "field_mapping": {
+      "direct_mappings": [
+        {
+          "source_field": "",
+          "target_field": "",
+          "transformation": ""
+        }
+      ],
+      "calculated_fields": [
+        {
+          "target_field": "",
+          "calculation_logic": "",
+          "description": ""
+        }
+      ],
+      "constant_values": [
+        {
+          "target_field": "",
+          "constant_value": "",
+          "description": ""
+        }
+      ]
+    },
+    "validation_rules": {
+      "pre_validations": [
+        {
+          "validation_type": "",
+          "field": "",
+          "rule": "",
+          "error_message": ""
+        }
+      ],
+      "data_validations": [
+        {
+          "validation_type": "",
+          "field": "",
+          "rule": "",
+          "error_message": ""
+        }
+      ],
+      "post_validations": []
+    },
+    "error_handling": {
+      "error_file_location": "",
+      "error_logging": {
+        "log_table": "",
+        "log_details": ""
+      },
+      "skip_on_error": false,
+      "rollback_on_error": true
+    },
+    "data_processing": {
+      "batch_size": 1000,
+      "commit_frequency": 100,
+      "parallel_processing": false,
+      "session_handling": {
+        "create_session": true,
+        "session_name": "",
+        "keep_session": false
+      }
+    }
+  },
+  "pre_requisites": {
+    "master_data_dependencies": [],
+    "customizing_requirements": [],
+    "authorization_requirements": []
+  },
+  "testing_requirements": {
+    "unit_test_scenarios": [],
+    "integration_test_scenarios": [],
+    "volume_test_data": ""
+  },
+  "migration_strategy": {
+    "cutover_approach": "",
+    "fallback_plan": "",
+    "data_reconciliation": ""
+  },
+  "special_requirements": "",
+  "performance_notes": ""
+}

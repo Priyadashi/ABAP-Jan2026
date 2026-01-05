@@ -1,0 +1,59 @@
+{
+  "ricef_type": "Report",
+  "project_name": "",
+  "description": "",
+  "sap_version": "S/4HANA",
+  "report_details": {
+    "report_name": "Z_",
+    "report_title": "",
+    "output_type": "ALV_GRID",
+    "selection_screen": {
+      "parameters": [
+        {
+          "name": "P_PARAM1",
+          "type": "CHAR",
+          "length": 10,
+          "mandatory": true,
+          "description": ""
+        }
+      ],
+      "select_options": [
+        {
+          "name": "S_FIELD1",
+          "table": "TABLENAME",
+          "field": "FIELDNAME",
+          "description": ""
+        }
+      ]
+    },
+    "data_sources": {
+      "primary_table": "",
+      "joined_tables": [],
+      "selection_criteria": ""
+    },
+    "output_fields": [
+      {
+        "field_name": "",
+        "description": "",
+        "data_element": ""
+      }
+    ],
+    "alv_features": {
+      "enable_filter": true,
+      "enable_sort": true,
+      "enable_sum": false,
+      "enable_subtotal": false,
+      "hotspot_fields": []
+    },
+    "authorization": {
+      "auth_object": "",
+      "auth_fields": []
+    }
+  },
+  "special_requirements": "",
+  "performance_notes": "",
+  "error_handling": {
+    "validation_rules": [],
+    "error_messages": []
+  }
+}
