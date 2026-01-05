@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Lightbulb, Copy, Download, RefreshCw, MessageSquare } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Lightbulb, Copy, Download, RefreshCw } from 'lucide-react';
 import Card from './Card';
 import Button from './Button';
 import { useToast } from './Toast';
@@ -7,6 +7,15 @@ import { useToast } from './Toast';
 const ChatSection = () => {
   const { addToast } = useToast();
   const [lastCodeBlock, setLastCodeBlock] = useState('');
+  const chatRef = useRef(null);
+
+  useEffect(() => {
+    // Wait for the ChatKit web component to be defined
+    if (chatRef.current && typeof window !== 'undefined' && window.customElements) {
+      // The web component will be loaded from the CDN script in index.html
+      console.log('ChatKit container ready');
+    }
+  }, []);
 
   const handleCopyCode = () => {
     if (lastCodeBlock) {
@@ -92,32 +101,19 @@ const ChatSection = () => {
         {/* Chat interface and action buttons */}
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* ChatKit placeholder - Main chat area */}
+            {/* ChatKit - Main chat area */}
             <div className="lg:col-span-3">
               <Card padding="none" className="overflow-hidden">
-                {/* ChatKit Integration Placeholder */}
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 min-h-[600px] flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                  <MessageSquare className="w-16 h-16 text-gray-400 mb-4" />
-                  <h3 className="text-xl font-bold text-gray-700 mb-2">
-                    ChatKit Integration Placeholder
-                  </h3>
-                  <p className="text-gray-600 text-center max-w-md mb-4">
-                    Replace this section with the OpenAI ChatKit component once you have your agent ID.
-                  </p>
-                  <div className="bg-gray-800 text-green-400 p-4 rounded-lg font-mono text-sm max-w-lg w-full">
-                    <code className="block whitespace-pre-wrap">
-{`import { ChatKit } from '@openai/chatkit';
-
-<ChatKit
-  agentId="wf_695b682cc6508190b4efd42040b8ee870d512e00ff2aae30"
-  enableFileUpload={true}
-  acceptedFileTypes={['.json']}
-  placeholder="Upload your filled template..."
-  theme="light"
-  height="600px"
-/>`}
-                    </code>
-                  </div>
+                {/* ChatKit Web Component Integration */}
+                <div ref={chatRef} className="min-h-[600px]">
+                  <openai-chatkit
+                    agent-id="wf_695b682cc6508190b4efd42040b8ee870d512e00ff2aae30"
+                    enable-file-upload="true"
+                    accepted-file-types=".json"
+                    placeholder="Upload your filled template or describe your ABAP requirements..."
+                    theme="light"
+                    style={{ height: '600px', width: '100%' }}
+                  ></openai-chatkit>
                 </div>
               </Card>
             </div>
