@@ -2,6 +2,76 @@
 
 Welcome! This guide will help you run the ABAP Agent MVP in GitHub Codespaces with simple copy-paste commands.
 
+## 📌 Choose Your Setup Method
+
+### Option A: Express Setup (Faster - 3 minutes)
+Use the automated setup script - just run one command and follow the prompts!
+
+**Jump to: [Express Setup](#express-setup)**
+
+### Option B: Step-by-Step Manual Setup (5 minutes)
+Follow detailed instructions with explanations for each step.
+
+**Continue reading below for manual setup**
+
+---
+
+## 🎯 Express Setup
+
+If you want the fastest setup, follow these steps:
+
+### 1. Open the Terminal
+- Look for the **Terminal** panel at the bottom of Codespaces
+- If you don't see it, click: **Terminal** → **New Terminal**
+
+### 2. Navigate to the Project
+```bash
+cd /workspaces/ABAP-Jan2026/abap-agent-mvp
+```
+
+### 3. Run the Setup Script
+```bash
+bash setup.sh
+```
+
+The script will:
+- Create configuration files
+- Install all dependencies (backend and frontend)
+- Guide you through adding your OpenAI API key
+
+### 4. Add Your API Key When Prompted
+The script will pause and ask you to add your OpenAI API key:
+- Open `api/.env` in the file explorer (left sidebar)
+- Replace `sk-proj-your-api-key-here` with your actual OpenAI API key
+- Save the file (Ctrl+S or Cmd+S)
+- Return to the terminal and press Enter
+
+### 5. Start the Servers
+After setup completes, follow the commands shown:
+
+**Terminal 1 (Backend):**
+```bash
+cd api
+python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Terminal 2 (Frontend - open a new terminal):**
+```bash
+npm run dev
+```
+
+### 6. Open the App
+- Click "Open in Browser" when the popup appears for port 5173
+- Or use the **PORTS** tab to open port 5173
+
+🎉 **You're done! Start generating ABAP code!**
+
+---
+
+## 📖 Manual Step-by-Step Setup
+
+Prefer to understand each step? Follow the detailed manual setup below.
+
 ## 📌 What You'll Do
 
 1. Open the terminal in Codespaces
