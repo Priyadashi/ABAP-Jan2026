@@ -19,10 +19,13 @@ app = FastAPI(
 )
 
 # Configure CORS
+# In development/Codespaces, allow all origins. In production, use specific origins.
 cors_origins = settings.cors_origins.split(",")
+allow_all_origins = os.getenv("ENVIRONMENT", "development") == "development"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=["*"] if allow_all_origins else cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
