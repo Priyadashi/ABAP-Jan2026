@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Lightbulb, Copy, Download, RefreshCw } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Lightbulb, Copy, Download, RefreshCw, Upload, Send, FileJson, X, MessageSquare } from 'lucide-react';
 import Card from './Card';
 import Button from './Button';
 import { useToast } from './Toast';
@@ -7,15 +7,58 @@ import { useToast } from './Toast';
 const ChatSection = () => {
   const { addToast } = useToast();
   const [lastCodeBlock, setLastCodeBlock] = useState('');
-  const chatRef = useRef(null);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    // Wait for the ChatKit web component to be defined
-    if (chatRef.current && typeof window !== 'undefined' && window.customElements) {
-      // The web component will be loaded from the CDN script in index.html
-      console.log('ChatKit container ready');
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'application/json') {
+      setUploadedFile(file);
+      addToast({
+        message: `${file.name} uploaded successfully!`,
+        type: 'success',
+      });
+
+      // Add a message showing the file was uploaded
+      setMessages(prev => [...prev, {
+        type: 'user',
+        content: `📎 Uploaded: ${file.name}`,
+        timestamp: new Date().toLocaleTimeString()
+      }]);
+    } else {
+      addToast({
+        message: 'Please upload a valid JSON file',
+        type: 'error',
+      });
     }
-  }, []);
+  };
+
+  const handleSendMessage = () => {
+    if (!input.trim() && !uploadedFile) return;
+
+    const userMessage = {
+      type: 'user',
+      content: input || 'Processing uploaded template...',
+      timestamp: new Date().toLocaleTimeString()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+
+    // Simulate AI response
+    setTimeout(() => {
+      const aiMessage = {
+        type: 'assistant',
+        content: '🤖 **AI ABAP Assistant**\n\nI\'m ready to help generate production-ready ABAP code! However, the ChatKit integration is currently being configured.\n\n**To proceed:**\n1. Your template has been received\n2. Please configure the OpenAI ChatKit component to enable AI code generation\n3. Once connected, I\'ll generate complete ABAP code following SAP best practices\n\n**What I can help with:**\n- Reports with ALV grids\n- Interface programs (IDoc, RFC, API)\n- Data conversion programs\n- Enhancement implementations\n- Smartforms and Adobe Forms',
+        timestamp: new Date().toLocaleTimeString()
+      };
+      setMessages(prev => [...prev, aiMessage]);
+    }, 1000);
+
+    setInput('');
+    setUploadedFile(null);
+  };
 
   const handleCopyCode = () => {
     if (lastCodeBlock) {
@@ -57,7 +100,10 @@ const ChatSection = () => {
   };
 
   const handleNewGeneration = () => {
+    setMessages([]);
     setLastCodeBlock('');
+    setInput('');
+    setUploadedFile(null);
     addToast({
       message: 'Chat cleared. Ready for new generation!',
       type: 'success',
@@ -101,21 +147,112 @@ const ChatSection = () => {
         {/* Chat interface and action buttons */}
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* ChatKit - Main chat area */}
+            {/* Chat Interface - Main chat area */}
             <div className="lg:col-span-3">
               <Card padding="none" className="overflow-hidden">
-                {/* ChatKit Web Component Integration */}
-                <div ref={chatRef} className="min-h-[600px]">
-                  <openai-chatkit
-                    agent-id="wf_695b682cc6508190b4efd42040b8ee870d512e00ff2aae30"
-                    enable-file-upload="true"
-                    accepted-file-types=".json"
-                    placeholder="Upload your filled template or describe your ABAP requirements..."
-                    theme="light"
-                    style={{ height: '600px', width: '100%' }}
-                  ></openai-chatkit>
+                {/* Chat Messages Area */}
+                <div className="h-[450px] overflow-y-auto p-6 bg-gray-50">
+                  {messages.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4">
+                        <MessageSquare className="w-10 h-10 text-white" />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        Welcome to ABAP AI Assistant
+                      </h3>
+                      <p className="text-gray-600 max-w-md">
+                        Upload a JSON template below or type your requirements to get started
+                        with AI-powered ABAP code generation.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {messages.map((msg, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[80%] rounded-lg p-4 ${
+                              msg.type === 'user'
+                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                                : 'bg-white border border-gray-200 text-gray-900'
+                            }`}
+                          >
+                            <div className="text-sm whitespace-pre-wrap">{msg.content}</div>
+                            <div
+                              className={`text-xs mt-2 ${
+                                msg.type === 'user' ? 'text-blue-100' : 'text-gray-500'
+                              }`}
+                            >
+                              {msg.timestamp}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Input Area */}
+                <div className="border-t border-gray-200 p-4 bg-white">
+                  {uploadedFile && (
+                    <div className="mb-3 flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                      <FileJson className="w-4 h-4 text-blue-600" />
+                      <span className="text-sm text-blue-900 flex-1">{uploadedFile.name}</span>
+                      <button
+                        onClick={() => setUploadedFile(null)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      accept=".json"
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex-shrink-0 px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                      title="Upload JSON template"
+                    >
+                      <Upload className="w-5 h-5 text-gray-600" />
+                    </button>
+
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      placeholder="Describe your ABAP requirements or upload a template..."
+                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    />
+
+                    <Button
+                      onClick={handleSendMessage}
+                      variant="primary"
+                      icon={Send}
+                      disabled={!input.trim() && !uploadedFile}
+                    >
+                      Send
+                    </Button>
+                  </div>
                 </div>
               </Card>
+
+              {/* ChatKit Integration Notice */}
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  <strong>⚠️ Note:</strong> This is a temporary interface. Configure OpenAI ChatKit
+                  (agent ID: wf_695b682cc6508190b4efd42040b8ee870d512e00ff2aae30) for full AI functionality.
+                </p>
+              </div>
             </div>
 
             {/* Quick action buttons */}
