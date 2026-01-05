@@ -1,129 +1,147 @@
-import React, { useState, useRef } from 'react';
-import { Lightbulb, Copy, Download, RefreshCw, Upload, Send, FileJson, X, MessageSquare } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Lightbulb, Copy, Download, RefreshCw, Upload, Send, FileJson, X, MessageSquare, Loader2 } from 'lucide-react';
 import Card from './Card';
 import Button from './Button';
 import { useToast } from './Toast';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 const ChatSection = () => {
   const { addToast } = useToast();
-  const [lastCodeBlock, setLastCodeBlock] = useState('');
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [threadId, setThreadId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastCodeBlock, setLastCodeBlock] = useState('');
   const fileInputRef = useRef(null);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const extractCodeBlocks = (content) => {
+    const codeBlockRegex = /```(?:abap)?\n([\s\S]*?)```/g;
+    const matches = [...content.matchAll(codeBlockRegex)];
+    if (matches.length > 0) {
+      setLastCodeBlock(matches[matches.length - 1][1].trim());
+    }
+  };
+
+  const handleFileSelect = (file) => {
+    if (file && (file.name.endsWith('.json') || file.name.endsWith('.txt'))) {
+      setUploadedFile(file);
+      addToast({ message: `${file.name} ready to upload`, type: 'success' });
+    } else {
+      addToast({ message: 'Please select a .json or .txt file', type: 'error' });
+    }
+  };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
-    if (file && file.type === 'application/json') {
-      setUploadedFile(file);
-      addToast({
-        message: `${file.name} uploaded successfully!`,
-        type: 'success',
-      });
-
-      // Add a message showing the file was uploaded
-      setMessages(prev => [...prev, {
-        type: 'user',
-        content: `📎 Uploaded: ${file.name}`,
-        timestamp: new Date().toLocaleTimeString()
-      }]);
-    } else {
-      addToast({
-        message: 'Please upload a valid JSON file',
-        type: 'error',
-      });
-    }
+    if (file) handleFileSelect(file);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!input.trim() && !uploadedFile) return;
 
     const userMessage = {
-      type: 'user',
-      content: input || 'Processing uploaded template...',
-      timestamp: new Date().toLocaleTimeString()
+      role: 'user',
+      content: input || `Uploaded file: ${uploadedFile?.name}`,
+      timestamp: new Date().toLocaleTimeString(),
     };
 
     setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiMessage = {
-        type: 'assistant',
-        content: '🤖 **AI ABAP Assistant**\n\nI\'m ready to help generate production-ready ABAP code! However, the ChatKit integration is currently being configured.\n\n**To proceed:**\n1. Your template has been received\n2. Please configure the OpenAI ChatKit component to enable AI code generation\n3. Once connected, I\'ll generate complete ABAP code following SAP best practices\n\n**What I can help with:**\n- Reports with ALV grids\n- Interface programs (IDoc, RFC, API)\n- Data conversion programs\n- Enhancement implementations\n- Smartforms and Adobe Forms',
-        timestamp: new Date().toLocaleTimeString()
-      };
-      setMessages(prev => [...prev, aiMessage]);
-    }, 1000);
+    try {
+      let response;
 
-    setInput('');
-    setUploadedFile(null);
-  };
+      if (uploadedFile) {
+        const formData = new FormData();
+        formData.append('file', uploadedFile);
+        formData.append('message', input || `Process this file: ${uploadedFile.name}`);
+        if (threadId) formData.append('thread_id', threadId);
 
-  const handleCopyCode = () => {
-    if (lastCodeBlock) {
-      navigator.clipboard.writeText(lastCodeBlock);
-      addToast({
-        message: 'Code copied to clipboard!',
-        type: 'success',
-      });
-    } else {
-      addToast({
-        message: 'No code to copy yet. Generate code first.',
-        type: 'info',
-      });
+        response = await fetch(`${API_URL}/api/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+      } else {
+        response = await fetch(`${API_URL}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ thread_id: threadId, message: input }),
+        });
+      }
+
+      if (!response.ok) throw new Error('Failed to get response');
+
+      const data = await response.json();
+      if (!threadId) setThreadId(data.thread_id);
+      extractCodeBlocks(data.content);
+
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: data.content,
+        timestamp: new Date().toLocaleTimeString(),
+      }]);
+
+      addToast({ message: 'Response received!', type: 'success' });
+    } catch (error) {
+      addToast({ message: `Error: ${error.message}`, type: 'error' });
+      setMessages(prev => [...prev, {
+        role: 'error',
+        content: `⚠️ Connection error. Check backend is running.\n\nError: ${error.message}`,
+        timestamp: new Date().toLocaleTimeString(),
+      }]);
+    } finally {
+      setIsLoading(false);
+      setInput('');
+      setUploadedFile(null);
     }
   };
 
-  const handleDownloadCode = () => {
-    if (lastCodeBlock) {
-      const blob = new Blob([lastCodeBlock], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'generated_code.abap';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+  const renderMessageContent = (content) => {
+    const parts = [];
+    let lastIndex = 0;
+    const codeBlockRegex = /```(?:abap)?\n([\s\S]*?)```/g;
+    let match;
 
-      addToast({
-        message: 'Code downloaded as .abap file!',
-        type: 'success',
-      });
-    } else {
-      addToast({
-        message: 'No code to download yet. Generate code first.',
-        type: 'info',
-      });
+    while ((match = codeBlockRegex.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(<p key={`text-${lastIndex}`} className="whitespace-pre-wrap">{content.substring(lastIndex, match.index)}</p>);
+      }
+      parts.push(
+        <div key={`code-${match.index}`} className="my-4">
+          <div className="bg-gray-900 rounded-lg overflow-hidden">
+            <div className="bg-gray-800 px-4 py-2 text-xs text-gray-300 flex justify-between items-center">
+              <span>ABAP</span>
+              <button onClick={() => { navigator.clipboard.writeText(match[1].trim()); addToast({ message: 'Copied!', type: 'success' }); }} className="hover:text-white"><Copy className="w-3 h-3" /></button>
+            </div>
+            <pre className="p-4 overflow-x-auto"><code className="text-sm text-green-400 font-mono">{match[1].trim()}</code></pre>
+          </div>
+        </div>
+      );
+      lastIndex = match.index + match[0].length;
     }
-  };
 
-  const handleNewGeneration = () => {
-    setMessages([]);
-    setLastCodeBlock('');
-    setInput('');
-    setUploadedFile(null);
-    addToast({
-      message: 'Chat cleared. Ready for new generation!',
-      type: 'success',
-    });
+    if (lastIndex < content.length) {
+      parts.push(<p key={`text-${lastIndex}`} className="whitespace-pre-wrap">{content.substring(lastIndex)}</p>);
+    }
+
+    return parts.length > 0 ? parts : <p className="whitespace-pre-wrap">{content}</p>;
   };
 
   return (
     <section id="chat-section" className="py-20 bg-white">
       <div className="container mx-auto px-4">
-        {/* Section header */}
         <div className="max-w-4xl mx-auto text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
-            AI ABAP Assistant
-          </h2>
-          <p className="text-lg text-gray-600">
-            Upload your filled template and start generating code
-          </p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">AI ABAP Assistant</h2>
+          <p className="text-lg text-gray-600">Upload your filled template and start generating code</p>
         </div>
 
-        {/* Instructions card */}
         <div className="max-w-4xl mx-auto mb-8">
           <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200">
             <div className="flex items-start gap-4">
@@ -131,190 +149,87 @@ const ChatSection = () => {
                 <Lightbulb className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
-                <h4 className="text-lg font-bold text-gray-900 mb-2">
-                  💡 Quick Start Guide
-                </h4>
-                <p className="text-gray-700 leading-relaxed">
-                  Upload your completed JSON template and describe any additional requirements.
-                  The AI will generate production-ready ABAP code following SAP best practices,
-                  including error handling, authorization checks, and comprehensive documentation.
-                </p>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">💡 Quick Start Guide</h4>
+                <p className="text-gray-700 leading-relaxed">Upload your completed JSON template and describe any additional requirements. The AI will generate production-ready ABAP code following SAP best practices.</p>
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Chat interface and action buttons */}
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Chat Interface - Main chat area */}
             <div className="lg:col-span-3">
               <Card padding="none" className="overflow-hidden">
-                {/* Chat Messages Area */}
                 <div className="h-[450px] overflow-y-auto p-6 bg-gray-50">
                   {messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center">
                       <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4">
                         <MessageSquare className="w-10 h-10 text-white" />
                       </div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        Welcome to ABAP AI Assistant
-                      </h3>
-                      <p className="text-gray-600 max-w-md">
-                        Upload a JSON template below or type your requirements to get started
-                        with AI-powered ABAP code generation.
-                      </p>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Welcome to ABAP AI Assistant</h3>
+                      <p className="text-gray-600 max-w-md mb-4">Upload a JSON template or type your requirements to get started</p>
+                      <div className="text-sm text-gray-500">Assistant ID: asst_A68xa1Vrevyh1Wm3CP81jCVx</div>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {messages.map((msg, idx) => (
-                        <div
-                          key={idx}
-                          className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div
-                            className={`max-w-[80%] rounded-lg p-4 ${
-                              msg.type === 'user'
-                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                                : 'bg-white border border-gray-200 text-gray-900'
-                            }`}
-                          >
-                            <div className="text-sm whitespace-pre-wrap">{msg.content}</div>
-                            <div
-                              className={`text-xs mt-2 ${
-                                msg.type === 'user' ? 'text-blue-100' : 'text-gray-500'
-                              }`}
-                            >
-                              {msg.timestamp}
-                            </div>
+                        <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[85%] rounded-lg p-4 ${msg.role === 'user' ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white' : msg.role === 'error' ? 'bg-red-50 border border-red-200 text-red-900' : 'bg-white border border-gray-200 text-gray-900'}`}>
+                            <div className="text-sm">{msg.role === 'user' ? <p className="whitespace-pre-wrap">{msg.content}</p> : renderMessageContent(msg.content)}</div>
+                            <div className={`text-xs mt-2 ${msg.role === 'user' ? 'text-blue-100' : msg.role === 'error' ? 'text-red-600' : 'text-gray-500'}`}>{msg.timestamp}</div>
                           </div>
                         </div>
                       ))}
+                      {isLoading && <div className="flex justify-start"><div className="bg-white border rounded-lg p-4"><div className="flex items-center gap-2 text-gray-600"><Loader2 className="w-4 h-4 animate-spin" /><span className="text-sm">Thinking...</span></div></div></div>}
+                      <div ref={messagesEndRef} />
                     </div>
                   )}
                 </div>
 
-                {/* Input Area */}
                 <div className="border-t border-gray-200 p-4 bg-white">
                   {uploadedFile && (
                     <div className="mb-3 flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
                       <FileJson className="w-4 h-4 text-blue-600" />
                       <span className="text-sm text-blue-900 flex-1">{uploadedFile.name}</span>
-                      <button
-                        onClick={() => setUploadedFile(null)}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                      <button onClick={() => setUploadedFile(null)} className="text-blue-600 hover:text-blue-800"><X className="w-4 h-4" /></button>
                     </div>
                   )}
-
                   <div className="flex gap-2">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileUpload}
-                      accept=".json"
-                      className="hidden"
-                    />
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex-shrink-0 px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                      title="Upload JSON template"
-                    >
-                      <Upload className="w-5 h-5 text-gray-600" />
-                    </button>
-
-                    <input
-                      type="text"
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                      placeholder="Describe your ABAP requirements or upload a template..."
-                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                    />
-
-                    <Button
-                      onClick={handleSendMessage}
-                      variant="primary"
-                      icon={Send}
-                      disabled={!input.trim() && !uploadedFile}
-                    >
-                      Send
-                    </Button>
+                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json,.txt" className="hidden" />
+                    <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors" disabled={isLoading}><Upload className="w-5 h-5 text-gray-600" /></button>
+                    <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleSendMessage()} placeholder="Describe your ABAP requirements..." className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" disabled={isLoading} />
+                    <Button onClick={handleSendMessage} variant="primary" icon={isLoading ? Loader2 : Send} disabled={(!input.trim() && !uploadedFile) || isLoading}>{isLoading ? 'Sending...' : 'Send'}</Button>
                   </div>
+                  <div className="mt-2 text-xs text-gray-500 text-center">💡 Drag & drop JSON/TXT files onto upload button</div>
                 </div>
               </Card>
-
-              {/* ChatKit Integration Notice */}
-              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800">
-                  <strong>⚠️ Note:</strong> This is a temporary interface. Configure OpenAI ChatKit
-                  (agent ID: wf_695b682cc6508190b4efd42040b8ee870d512e00ff2aae30) for full AI functionality.
-                </p>
-              </div>
             </div>
 
-            {/* Quick action buttons */}
             <div className="lg:col-span-1">
               <Card>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">
-                  Quick Actions
-                </h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
                 <div className="space-y-3">
-                  <Button
-                    onClick={handleCopyCode}
-                    variant="outline"
-                    size="sm"
-                    icon={Copy}
-                    className="w-full justify-start"
-                  >
-                    Copy Code
-                  </Button>
-                  <Button
-                    onClick={handleDownloadCode}
-                    variant="outline"
-                    size="sm"
-                    icon={Download}
-                    className="w-full justify-start"
-                  >
-                    Download .abap
-                  </Button>
-                  <Button
-                    onClick={handleNewGeneration}
-                    variant="outline"
-                    size="sm"
-                    icon={RefreshCw}
-                    className="w-full justify-start"
-                  >
-                    New Generation
-                  </Button>
+                  <Button onClick={() => { if(lastCodeBlock) { navigator.clipboard.writeText(lastCodeBlock); addToast({message:'Code copied!',type:'success'}); } else addToast({message:'No code yet',type:'info'}); }} variant="outline" size="sm" icon={Copy} className="w-full justify-start">Copy Code</Button>
+                  <Button onClick={() => { if(lastCodeBlock) { const blob=new Blob([lastCodeBlock],{type:'text/plain'}); const url=URL.createObjectURL(blob); const link=document.createElement('a'); link.href=url; link.download='generated_code.abap'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); addToast({message:'Downloaded!',type:'success'}); } else addToast({message:'No code yet',type:'info'}); }} variant="outline" size="sm" icon={Download} className="w-full justify-start">Download .abap</Button>
+                  <Button onClick={() => { setMessages([]); setLastCodeBlock(''); setInput(''); setUploadedFile(null); setThreadId(null); addToast({message:'Chat cleared!',type:'success'}); }} variant="outline" size="sm" icon={RefreshCw} className="w-full justify-start">New Generation</Button>
                 </div>
-
-                {/* Tips section */}
                 <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h4 className="text-sm font-bold text-gray-900 mb-2">
-                    Pro Tips
-                  </h4>
+                  <h4 className="text-sm font-bold text-gray-900 mb-2">Pro Tips</h4>
                   <ul className="text-xs text-gray-600 space-y-2">
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-500 mt-0.5">•</span>
-                      <span>Upload JSON templates for better results</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-500 mt-0.5">•</span>
-                      <span>Provide specific field names and table references</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-500 mt-0.5">•</span>
-                      <span>Ask for refinements or modifications</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-500 mt-0.5">•</span>
-                      <span>Request additional documentation or comments</span>
-                    </li>
+                    <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">•</span><span>Upload JSON templates for better results</span></li>
+                    <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">•</span><span>Provide specific field names and table references</span></li>
+                    <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">•</span><span>Ask for refinements or modifications</span></li>
+                    <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">•</span><span>Request additional documentation</span></li>
                   </ul>
                 </div>
+                {threadId && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="text-xs text-gray-500">
+                      <div className="flex items-center gap-2 mb-1"><div className="w-2 h-2 bg-green-500 rounded-full"></div><span>Connected</span></div>
+                      <div className="font-mono text-[10px] break-all">Thread: {threadId.substring(0,20)}...</div>
+                    </div>
+                  </div>
+                )}
               </Card>
             </div>
           </div>
