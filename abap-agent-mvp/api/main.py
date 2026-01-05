@@ -8,8 +8,8 @@ from pydantic import BaseModel
 from typing import Optional, List
 import os
 
-from .config import settings
-from .openai_client import OpenAIAssistantClient
+from config import settings
+from openai_client import OpenAIAssistantClient
 
 # Initialize FastAPI app
 app = FastAPI(

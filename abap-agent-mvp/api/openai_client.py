@@ -6,7 +6,7 @@ import asyncio
 import time
 from typing import Optional, List, Dict, Any
 from openai import AsyncOpenAI
-from .config import settings, get_assistant_id
+from config import settings, get_assistant_id
 
 
 class OpenAIAssistantClient:
