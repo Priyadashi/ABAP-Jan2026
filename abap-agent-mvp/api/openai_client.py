@@ -72,9 +72,15 @@ class OpenAIAssistantClient:
 
             if run_status.status == "completed":
                 break
+            elif run_status.status == "requires_action":
+                # If the assistant requires tool calls, we should handle them or fail gracefully
+                # For now, we'll just fail since no tools are implemented yet
+                raise Exception(f"Run requires action: {run_status.required_action}")
             elif run_status.status in ["failed", "cancelled", "expired"]:
-                raise Exception(f"Run {run_status.status}: {run_status.last_error}")
-
+                error_msg = getattr(run_status, "last_error", "Unknown error")
+                raise Exception(f"Run {run_status.status}: {error_msg}")
+            
+            # Continue polling for queued or in_progress
             await asyncio.sleep(1)
             attempt += 1
 
