@@ -13,14 +13,11 @@ const getApiUrl = () => {
 
     // Check if running in GitHub Codespaces (various URL patterns)
     const hostname = window.location.hostname;
-    const origin = window.location.origin;
 
     // Pattern: xxx-5173.app.github.dev or xxx-5173.preview.app.github.dev
     if (hostname.includes('github.dev') || hostname.includes('githubpreview.dev')) {
-        // Replace the port number in the hostname
-        const backendUrl = origin.replace(/-5173\./, '-8000.');
-        console.log('[n8n] Codespaces detected, backend URL:', backendUrl);
-        return backendUrl;
+        console.log('[n8n] Codespaces detected, using Vite proxy (relative URL)');
+        return ''; // Return empty string to use relative path /api which goes through Vite proxy
     }
 
     // Default to localhost
