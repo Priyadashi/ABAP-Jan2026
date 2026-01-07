@@ -2,7 +2,7 @@
 ABAP Agent MVP - n8n Webhook Backend
 Provides API endpoints for n8n workflow integration
 """
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -27,6 +27,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"[DEBUG] Request: {request.method} {request.url} Origin: {request.headers.get('origin')}")
+    response = await call_next(request)
+    print(f"[DEBUG] Response status: {response.status_code}")
+    return response
 
 # Initialize n8n client
 n8n_client = N8nWorkflowClient()

@@ -100,6 +100,7 @@ const ChatSectionN8n = () => {
             const response = await fetch(`${API_URL}/api/upload`, {
                 method: 'POST',
                 body: formData,
+                credentials: 'omit', // Explicitly omit cookies/credentials for wildcard CORS
             });
 
             if (!response.ok) {
