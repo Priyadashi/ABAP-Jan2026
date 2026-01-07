@@ -11,14 +11,20 @@ const getApiUrl = () => {
         return import.meta.env.VITE_API_URL;
     }
 
-    // Check if running in GitHub Codespaces
+    // Check if running in GitHub Codespaces (various URL patterns)
     const hostname = window.location.hostname;
-    if (hostname.includes('github.dev')) {
-        // Replace port 5173 with 8000 for backend
-        return window.location.origin.replace('-5173', '-8000');
+    const origin = window.location.origin;
+
+    // Pattern: xxx-5173.app.github.dev or xxx-5173.preview.app.github.dev
+    if (hostname.includes('github.dev') || hostname.includes('githubpreview.dev')) {
+        // Replace the port number in the hostname
+        const backendUrl = origin.replace(/-5173\./, '-8000.');
+        console.log('[n8n] Codespaces detected, backend URL:', backendUrl);
+        return backendUrl;
     }
 
     // Default to localhost
+    console.log('[n8n] Using localhost backend');
     return 'http://localhost:8000';
 };
 
