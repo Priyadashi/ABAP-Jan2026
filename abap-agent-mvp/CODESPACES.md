@@ -296,6 +296,26 @@ Both servers will stop.
 
 ---
 
+## 🔄 How to Restart
+
+If you closed the terminals or restarted the Codespace, here is how to get back up and running:
+
+1.  **Open Terminal 1 (Backend)**:
+    ```bash
+    cd /workspaces/ABAP-Jan2026/abap-agent-mvp/api
+    python main_n8n.py
+    ```
+
+2.  **Open Terminal 2 (Frontend)**:
+    ```bash
+    cd /workspaces/ABAP-Jan2026/abap-agent-mvp
+    npm run dev:n8n
+    ```
+
+*(For OpenAI version, use `python main.py` and `npm run dev` instead)*
+
+---
+
 ## 🔧 Troubleshooting
 
 ### Problem: "pip: command not found"

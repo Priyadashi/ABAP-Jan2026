@@ -94,6 +94,36 @@ Frontend will run at: `http://localhost:5173`
 
 Navigate to `http://localhost:5173` and start generating ABAP code!
 
+## 🔄 Restarting the Servers
+
+If `Ctrl+C` was pressed or the Codespace restarted, run these commands to start again:
+
+### Option A: n8n Version (Recommended)
+
+**Terminal 1 (Backend):**
+```bash
+cd api
+python main_n8n.py
+```
+
+**Terminal 2 (Frontend):**
+```bash
+npm run dev:n8n
+```
+
+### Option B: OpenAI Version
+
+**Terminal 1 (Backend):**
+```bash
+cd api
+python main.py
+```
+
+**Terminal 2 (Frontend):**
+```bash
+npm run dev
+```
+
 ## 📋 Features
 
 ### Core Functionality
