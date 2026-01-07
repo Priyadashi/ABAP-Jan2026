@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:n8n": "vite --config vite.config.n8n.js",
     "build": "vite build",
+    "build:n8n": "vite build --config vite.config.n8n.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

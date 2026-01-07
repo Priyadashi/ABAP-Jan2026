@@ -13,9 +13,9 @@ const getApiUrl = () => {
 
   // Check if running in GitHub Codespaces
   const hostname = window.location.hostname;
-  if (hostname.includes('app.github.dev')) {
+  if (hostname.includes('github.dev')) {
     // Replace port 5173 with 8000 for backend
-    return window.location.origin.replace('-5173.', '-8000.');
+    return window.location.origin.replace('-5173', '-8000');
   }
 
   // Default to localhost
@@ -48,11 +48,11 @@ const ChatSection = () => {
   };
 
   const handleFileSelect = (file) => {
-    if (file && (file.name.endsWith('.json') || file.name.endsWith('.txt'))) {
+    if (file && (file.name.endsWith('.json') || file.name.endsWith('.txt') || file.name.endsWith('.xlsx'))) {
       setUploadedFile(file);
       addToast({ message: `${file.name} ready to upload`, type: 'success' });
     } else {
-      addToast({ message: 'Please select a .json or .txt file', type: 'error' });
+      addToast({ message: 'Please select a .json, .txt, or .xlsx file', type: 'error' });
     }
   };
 
@@ -213,12 +213,12 @@ const ChatSection = () => {
                     </div>
                   )}
                   <div className="flex gap-2">
-                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json,.txt" className="hidden" />
+                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".json,.txt,.xlsx" className="hidden" />
                     <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors" disabled={isLoading}><Upload className="w-5 h-5 text-gray-600" /></button>
                     <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleSendMessage()} placeholder="Describe your ABAP requirements..." className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" disabled={isLoading} />
                     <Button onClick={handleSendMessage} variant="primary" icon={isLoading ? Loader2 : Send} disabled={(!input.trim() && !uploadedFile) || isLoading}>{isLoading ? 'Sending...' : 'Send'}</Button>
                   </div>
-                  <div className="mt-2 text-xs text-gray-500 text-center">💡 Drag & drop JSON/TXT files onto upload button</div>
+                  <div className="mt-2 text-xs text-gray-500 text-center">💡 Drag & drop JSON/TXT/XLSX files onto upload button</div>
                 </div>
               </Card>
             </div>
@@ -227,9 +227,9 @@ const ChatSection = () => {
               <Card>
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
                 <div className="space-y-3">
-                  <Button onClick={() => { if(lastCodeBlock) { navigator.clipboard.writeText(lastCodeBlock); addToast({message:'Code copied!',type:'success'}); } else addToast({message:'No code yet',type:'info'}); }} variant="outline" size="sm" icon={Copy} className="w-full justify-start">Copy Code</Button>
-                  <Button onClick={() => { if(lastCodeBlock) { const blob=new Blob([lastCodeBlock],{type:'text/plain'}); const url=URL.createObjectURL(blob); const link=document.createElement('a'); link.href=url; link.download='generated_code.abap'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); addToast({message:'Downloaded!',type:'success'}); } else addToast({message:'No code yet',type:'info'}); }} variant="outline" size="sm" icon={Download} className="w-full justify-start">Download .abap</Button>
-                  <Button onClick={() => { setMessages([]); setLastCodeBlock(''); setInput(''); setUploadedFile(null); setThreadId(null); addToast({message:'Chat cleared!',type:'success'}); }} variant="outline" size="sm" icon={RefreshCw} className="w-full justify-start">New Generation</Button>
+                  <Button onClick={() => { if (lastCodeBlock) { navigator.clipboard.writeText(lastCodeBlock); addToast({ message: 'Code copied!', type: 'success' }); } else addToast({ message: 'No code yet', type: 'info' }); }} variant="outline" size="sm" icon={Copy} className="w-full justify-start">Copy Code</Button>
+                  <Button onClick={() => { if (lastCodeBlock) { const blob = new Blob([lastCodeBlock], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'generated_code.abap'; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); addToast({ message: 'Downloaded!', type: 'success' }); } else addToast({ message: 'No code yet', type: 'info' }); }} variant="outline" size="sm" icon={Download} className="w-full justify-start">Download .abap</Button>
+                  <Button onClick={() => { setMessages([]); setLastCodeBlock(''); setInput(''); setUploadedFile(null); setThreadId(null); addToast({ message: 'Chat cleared!', type: 'success' }); }} variant="outline" size="sm" icon={RefreshCw} className="w-full justify-start">New Generation</Button>
                 </div>
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <h4 className="text-sm font-bold text-gray-900 mb-2">Pro Tips</h4>
@@ -244,7 +244,7 @@ const ChatSection = () => {
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     <div className="text-xs text-gray-500">
                       <div className="flex items-center gap-2 mb-1"><div className="w-2 h-2 bg-green-500 rounded-full"></div><span>Connected</span></div>
-                      <div className="font-mono text-[10px] break-all">Thread: {threadId.substring(0,20)}...</div>
+                      <div className="font-mono text-[10px] break-all">Thread: {threadId.substring(0, 20)}...</div>
                     </div>
                   </div>
                 )}

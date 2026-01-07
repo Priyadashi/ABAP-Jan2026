@@ -19,13 +19,21 @@ This guide walks you through running the application in GitHub Codespaces with s
 **🎉 Major Update:** Complete rewrite using OpenAI Assistants API with FastAPI backend!
 
 - ✅ **Production-Ready Backend**: FastAPI server with OpenAI Assistants API integration
+- ✅ **n8n Workflow Mode**: Alternative backend that integrates with n8n webhooks
 - ✅ **Secure Architecture**: API key never exposed to frontend
-- ✅ **File Upload Support**: Upload JSON/TXT templates directly to AI
+- ✅ **File Upload Support**: Upload JSON/TXT/XLSX templates directly to AI
 - ✅ **Conversation Threading**: Maintains context across multiple messages
 - ✅ **ABAP Code Highlighting**: Syntax-highlighted code blocks
 - ✅ **Real-time Streaming**: Live responses from AI assistant
 - ✅ **Docker Ready**: Containerized backend for easy deployment
 - ✅ **Cloud Run Compatible**: Deploy to Google Cloud with one command
+
+## 🔄 Two Modes Available
+
+| Mode | Backend | Use Case |
+|------|---------|----------|
+| **OpenAI** | `python main.py` / `npm run dev` | Direct OpenAI Assistants API integration |
+| **n8n Workflow** | `python main_n8n.py` / `npm run dev:n8n` | Custom n8n workflow integration |
 
 ## 🏗️ Architecture
 

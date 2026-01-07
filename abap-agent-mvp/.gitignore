@@ -33,3 +33,8 @@ dist-ssr
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Log files
+backend_log*.txt
+backend_debug.log
+backend_error.log

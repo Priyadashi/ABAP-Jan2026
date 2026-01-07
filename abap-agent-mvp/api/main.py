@@ -10,6 +10,7 @@ import os
 
 from config import settings
 from openai_client import OpenAIAssistantClient
+from utils import get_file_content_as_text
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -25,8 +26,8 @@ allow_all_origins = os.getenv("ENVIRONMENT", "development") == "development"
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins if not allow_all_origins else ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:3000"],
-    allow_origin_regex="https://.*-5173\.app\.github\.dev" if allow_all_origins else None,
+    allow_origins=cors_origins if not allow_all_origins else ["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173", "http://127.0.0.1:3000", "http://localhost:5174", "http://127.0.0.1:5174"],
+    allow_origin_regex=r"https://.*-5173\.app\.github\.dev" if allow_all_origins else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -138,8 +139,8 @@ async def upload_file(
     ricef_type: Optional[str] = Form(None),
 ):
     """
-    Upload a file and send it to the assistant
-    Returns the assistant's response after processing the file
+    Upload a file, extract its content, and send to assistant as text.
+    No file attachments - just parsed content in the message.
     """
     try:
         # Validate file type
@@ -160,22 +161,24 @@ async def upload_file(
                 detail=f"File too large. Max size: {settings.max_file_size} bytes",
             )
 
-        # Upload file to OpenAI
-        file_id = await openai_client.upload_file(file_content, file.filename)
+        # Extract text from file
+        parsed_content = get_file_content_as_text(file_content, file.filename)
+        
+        # Build message with file content
+        enhanced_message = f"{message}\n\nFile: {file.filename}\n\n{parsed_content}"
 
-        # Create thread if not provided
+        # Create thread if needed
         if not thread_id:
             thread_id = await openai_client.create_thread()
 
-        # Add message with file attachment
-        await openai_client.add_message(thread_id, message, file_ids=[file_id])
+        # Send message (no file attachment)
+        await openai_client.add_message(thread_id, enhanced_message)
 
-        # Run assistant and get response
+        # Get response
         response = await openai_client.run_assistant(thread_id, ricef_type)
 
         return {
             "thread_id": thread_id,
-            "file_id": file_id,
             "filename": file.filename,
             "message_id": response["message_id"],
             "content": response["content"],

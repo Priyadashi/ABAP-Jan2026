@@ -28,7 +28,11 @@ class Settings(BaseSettings):
 
     # Application Settings
     max_file_size: int = 10 * 1024 * 1024  # 10MB
-    allowed_file_types: list = [".json", ".txt"]
+    allowed_file_types: list = [".json", ".txt", ".xlsx"]
+
+    # n8n Webhook Configuration
+    n8n_webhook_url: str = "https://pd03-n8n-free.hf.space/webhook/f36fd8cb-ff8d-44b1-9417-eefbb60ce13a"
+    n8n_timeout: int = 120  # seconds - workflows may take time
 
     class Config:
         env_file = ".env"

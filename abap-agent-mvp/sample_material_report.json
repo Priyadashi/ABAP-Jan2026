@@ -1,0 +1,86 @@
+{
+    "ricef_type": "Report",
+    "project_name": "Material Master Explorer",
+    "description": "A report to display basic material data from MARA and MAKT tables.",
+    "sap_version": "S/4HANA",
+    "report_details": {
+        "report_name": "ZMAT_BASIC_REPORT",
+        "report_title": "Material Master Basic View Report",
+        "output_type": "ALV_GRID",
+        "selection_screen": {
+            "parameters": [],
+            "select_options": [
+                {
+                    "name": "S_MATNR",
+                    "table": "MARA",
+                    "field": "MATNR",
+                    "description": "Material Number"
+                },
+                {
+                    "name": "S_MTART",
+                    "table": "MARA",
+                    "field": "MTART",
+                    "description": "Material Type"
+                }
+            ]
+        },
+        "data_sources": {
+            "primary_table": "MARA",
+            "joined_tables": [
+                {
+                    "table": "MAKT",
+                    "join_type": "INNER",
+                    "condition": "MARA~MATNR = MAKT~MATNR AND MAKT~SPRAS = SY-LANGU"
+                }
+            ],
+            "selection_criteria": "Filter by material number and type from selection screen."
+        },
+        "output_fields": [
+            {
+                "field_name": "MATNR",
+                "description": "Material Number",
+                "data_element": "MATNR"
+            },
+            {
+                "field_name": "MTART",
+                "description": "Material Type",
+                "data_element": "MTART"
+            },
+            {
+                "field_name": "MBRSH",
+                "description": "Industry Sector",
+                "data_element": "MBRSH"
+            },
+            {
+                "field_name": "MAKTX",
+                "description": "Material Description",
+                "data_element": "MAKTX"
+            }
+        ],
+        "alv_features": {
+            "enable_filter": true,
+            "enable_sort": true,
+            "enable_sum": false,
+            "enable_subtotal": false,
+            "hotspot_fields": [
+                "MATNR"
+            ]
+        },
+        "authorization": {
+            "auth_object": "M_MATE_MAT",
+            "auth_fields": [
+                "BEGRU"
+            ]
+        }
+    },
+    "special_requirements": "Add a logo to the ALV header.",
+    "performance_notes": "Use fields from index where possible.",
+    "error_handling": {
+        "validation_rules": [
+            "Check if material exists"
+        ],
+        "error_messages": [
+            "No data found for the selection"
+        ]
+    }
+}
