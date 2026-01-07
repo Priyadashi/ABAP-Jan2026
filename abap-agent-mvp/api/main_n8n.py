@@ -18,21 +18,14 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Configure CORS (same as original)
+# Configure CORS - allow all origins in development for Codespaces compatibility
 cors_origins = settings.cors_origins.split(",")
 allow_all_origins = os.getenv("ENVIRONMENT", "development") == "development"
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins if not allow_all_origins else [
-        "http://localhost:5173", 
-        "http://localhost:3000", 
-        "http://127.0.0.1:5173", 
-        "http://127.0.0.1:3000", 
-        "http://localhost:5174", 
-        "http://127.0.0.1:5174"
-    ],
-    allow_origin_regex=r"https://.*-5173\.app\.github\.dev" if allow_all_origins else None,
+    allow_origins=["*"] if allow_all_origins else cors_origins,
+    allow_origin_regex=r"https://.*\.app\.github\.dev" if allow_all_origins else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
